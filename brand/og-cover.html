@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<style>
+  @page { size: 1200px 630px; margin: 0; }
+  html, body { margin: 0; padding: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #eef1fa;
+    background:
+      radial-gradient(820px 500px at 2% -16%, rgba(99, 102, 241, .42), transparent 60%),
+      radial-gradient(660px 420px at 104% 112%, rgba(14, 165, 233, .16), transparent 58%),
+      #090b12;
+  }
+  .dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(900px 620px at 50% 40%, #000, transparent 78%);
+            mask-image: radial-gradient(900px 620px at 50% 40%, #000, transparent 78%);
+  }
+  .left { position: relative; padding: 62px 0 0 72px; width: 640px; }
+
+  .brandline { display: flex; align-items: center; gap: 19px; }
+  .brandline .mark { width: 70px; height: 70px; filter: drop-shadow(0 18px 34px rgba(79,70,229,.45)); }
+  .brandline .names { display: flex; flex-direction: column; gap: 8px; }
+  .brandline b { font-size: 40px; font-weight: 700; letter-spacing: 1.5px; line-height: 1; }
+  .brandline i {
+    font-style: normal; font-size: 12px; font-weight: 600;
+    letter-spacing: 4.4px; color: #8b96cf; text-transform: uppercase;
+  }
+
+  .slogan {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 34px;
+    font-size: 15.5px; font-weight: 600;
+    letter-spacing: 2.6px; color: #98a3d6;
+  }
+  .slogan .sq {
+    width: 9px; height: 9px; border-radius: 2.5px;
+    background: linear-gradient(145deg, #8f8dfa, #4a41d4);
+    box-shadow: 0 0 0 3px rgba(124,140,255,.16);
+    flex: none;
+  }
+
+  h1 { margin: 24px 0 0; font-size: 44px; font-weight: 700; line-height: 1.36; letter-spacing: .5px; }
+  h1 em { font-style: normal; color: #a8b2ff; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; width: 560px; }
+  .chip {
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    font-size: 13.5px; letter-spacing: .5px; padding: 5px 11px; border-radius: 6px;
+    color: #9fa9d4; background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  .pills { display: flex; gap: 10px; margin-top: 30px; }
+  .pill {
+    font-size: 14px; padding: 7px 15px; border-radius: 999px;
+    color: #c3cbe8; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.09); letter-spacing: .4px;
+  }
+  .pill.hl { color: #ccd4ff; background: rgba(124,140,255,.14); border-color: rgba(124,140,255,.32); }
+  .pill.hl::before {
+    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #6ee7b7; margin-right: 8px; vertical-align: 2px;
+    box-shadow: 0 0 8px rgba(110,231,183,.85);
+  }
+
+  /* 右侧工具墙 */
+  .wall {
+    position: absolute; right: 56px; top: 74px;
+    display: grid; grid-template-columns: repeat(3, 152px); gap: 14px;
+  }
+  .tile {
+    height: 152px; border-radius: 20px;
+    background: linear-gradient(160deg, rgba(255,255,255,.065), rgba(255,255,255,.025));
+    border: 1px solid rgba(255,255,255,.085);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .tile span {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 17px; letter-spacing: 1px; color: #c3cbe8;
+  }
+  .tile i { font-style: normal; font-size: 11px; color: #6a739c; letter-spacing: .6px; }
+  .tile.on {
+    background: linear-gradient(160deg, rgba(124,140,255,.26), rgba(79,70,229,.14));
+    border-color: rgba(140,152,255,.42);
+    box-shadow: 0 18px 44px -22px rgba(99,102,241,.9), inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .tile.on span { color: #eef1ff; }
+
+  .footnote {
+    position: absolute; left: 72px; bottom: 82px;
+    font-size: 14.5px; letter-spacing: .5px; color: #6a739c;
+  }
+  .domain {
+    position: absolute; left: 72px; bottom: 44px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 15px; letter-spacing: .8px; color: #5f6a96;
+  }
+  .bar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+    background: linear-gradient(90deg, #6f6cf0, #4f46e5 42%, #0e7490);
+  }
+</style></head>
+<body>
+  <div class="dots"></div>
+
+  <div class="left">
+    <div class="brandline">
+      <svg class="mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#9090fa"/><stop offset=".55" stop-color="#5b52ea"/><stop offset="1" stop-color="#3f37c6"/>
+          </linearGradient>
+          <mask id="lm">
+            <rect width="32" height="32" fill="#000"/>
+            <rect x="7.4" y="7.4" width="17.2" height="17.2" rx="4.9" fill="#fff"/>
+            <rect x="16.6" y="16.6" width="5.6" height="5.6" rx="1.5" fill="#000"/>
+          </mask>
+        </defs>
+        <rect width="32" height="32" rx="8.6" fill="url(#lg)"/>
+        <rect width="32" height="32" fill="#fff" mask="url(#lm)"/>
+      </svg>
+      <div class="names">
+        <b>方寸工具箱</b>
+        <i>Fancun Toolkit</i>
+      </div>
+    </div>
+
+    <div class="slogan"><span class="sq"></span>方寸之间，得心应手</div>
+
+    <h1>16 件开发者利器，<br><em>装进方寸之间</em></h1>
+
+    <div class="chips">
+      <span class="chip">JSON</span><span class="chip">JWT</span><span class="chip">CRON</span>
+      <span class="chip">BASE64</span><span class="chip">REGEX</span><span class="chip">MD5</span>
+      <span class="chip">QR</span><span class="chip">WEBP</span>
+    </div>
+
+    <div class="pills">
+      <span class="pill hl">全部本地运算</span>
+      <span class="pill">数据不上传</span>
+      <span class="pill">零依赖</span>
+    </div>
+  </div>
+
+  <div class="wall">
+    <div class="tile on"><span>{ }</span><i>JSON</i></div>
+    <div class="tile"><span>JWT</span><i>验签</i></div>
+    <div class="tile"><span>CRON</span><i>解析</i></div>
+    <div class="tile"><span>REGEX</span><i>测试</i></div>
+    <div class="tile"><span>QR</span><i>生成</i></div>
+    <div class="tile"><span>MD5</span><i>哈希</i></div>
+    <div class="tile"><span>BASE64</span><i>编解码</i></div>
+    <div class="tile"><span>IMG</span><i>压缩</i></div>
+    <div class="tile"><span>+8</span><i>更多</i></div>
+  </div>
+
+  <div class="footnote">免费 · 无需注册 · 无广告 · 支持离线</div>
+  <div class="domain">tools.v5pc.com</div>
+  <div class="bar"></div>
+</body></html>

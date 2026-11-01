@@ -1,0 +1,15 @@
+# 依赖与构建产物
+node_modules/
+dist/
+
+# 本地工作记录与运维文档（含服务器地址，不进公开仓库）
+.workbuddy/
+DEPLOY.md
+
+# 临时测试页（截图 / 断言用，用完即删）
+__*.html
+*.log
+
+# 编辑器与系统
+.DS_Store
+Thumbs.db

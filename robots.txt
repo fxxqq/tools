@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# 部署脚本、依赖目录不参与索引
+Disallow: /deploy/
+Disallow: /node_modules/
+
+# 后台与接口不参与索引
+Disallow: /admin.html
+Disallow: /api/
+
+# 站点地图
+Sitemap: https://tools.v5pc.com/sitemap.xml

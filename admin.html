@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#4f46e5">
+<title>后台管理 · 方寸工具箱</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<style>
+  :root {
+    --bg: #f4f5f9; --panel: #fff; --panel-2: #f8f9fc; --panel-3: #f1f3f9;
+    --border: #e4e7ef; --border-strong: #d3d8e4;
+    --text: #14161c; --text-2: #3d4453; --muted: #6d7688;
+    --accent: #4f46e5; --accent-hover: #4338ca; --accent-soft: #eef0ff;
+    --ok: #0f9d58; --err: #d9534f; --warn: #c77c0b;
+    --shadow-sm: 0 1px 2px rgba(18,24,40,.05);
+    --shadow: 0 8px 24px -12px rgba(18,24,40,.16);
+    --mono: "JetBrains Mono", Consolas, monospace;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0d14; --panel: #141822; --panel-2: #10141d; --panel-3: #1a1f2b;
+      --border: #262c3a; --border-strong: #333a4b;
+      --text: #eef1f8; --text-2: #c3cadb; --muted: #8b93a7;
+      --accent: #6f6cf0; --accent-hover: #8b88ff; --accent-soft: #1c2140;
+      --shadow: 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 14px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 14px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--panel);
+    cursor: pointer; font-size: 13.5px; transition: .15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-hover); color: #fff; }
+  .btn.danger:hover { border-color: var(--err); color: var(--err); }
+  .btn.sm { height: 30px; padding: 0 10px; font-size: 12.5px; border-radius: 7px; }
+
+  /* 登录 */
+  .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+  .login-card {
+    width: 100%; max-width: 360px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 30px 26px; box-shadow: var(--shadow);
+  }
+  .login-card .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .mark {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: linear-gradient(145deg, #6f6cf0, #4f46e5 55%, #3b32b8);
+    display: grid; place-items: center; flex: none;
+    box-shadow: 0 8px 18px -8px rgba(79,70,229,.75);
+  }
+  .mark::after { content: ""; width: 17px; height: 17px; border-radius: 5px; background: #fff; }
+  .login-card h1 { font-size: 17px; margin: 0; letter-spacing: -.2px; }
+  .login-card .sub { font-size: 12px; color: var(--muted); }
+  label { display: block; font-size: 12.5px; color: var(--muted); margin: 12px 0 5px; }
+  input[type=text], input[type=password], input[type=url], input[type=datetime-local], select, textarea {
+    width: 100%; padding: 9px 11px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--panel-2);
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  textarea { resize: vertical; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+  .msg { font-size: 12.5px; margin-top: 10px; min-height: 18px; }
+  .msg.err { color: var(--err); }
+  .msg.ok { color: var(--ok); }
+
+  /* 主框架 */
+  .shell { max-width: 1040px; margin: 0 auto; padding: 20px 20px 60px; }
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 6px 0 18px; }
+  .topbar .mark { width: 32px; height: 32px; border-radius: 9px; }
+  .topbar .mark::after { width: 14px; height: 14px; border-radius: 4px; }
+  .topbar b { font-size: 15px; }
+  .topbar .tag { font-size: 11px; color: var(--muted); border: 1px solid var(--border); padding: 1px 7px; border-radius: 999px; }
+  .spacer { flex: 1; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab {
+    padding: 9px 14px; border: 0; background: none; cursor: pointer;
+    font-size: 13.5px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 780px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 430px) { .cards { grid-template-columns: 1fr; } }
+  .stat {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; box-shadow: var(--shadow-sm);
+  }
+  .stat .k { font-size: 12px; color: var(--muted); }
+  .stat .v { font-size: 25px; font-weight: 700; letter-spacing: -.6px; margin-top: 2px; }
+  .stat .v small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px;
+  }
+  .panel h2 { font-size: 13.5px; margin: 0 0 12px; font-weight: 600; }
+  .chart { width: 100%; height: 190px; display: block; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: 3px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { font-size: 12px; color: var(--muted); font-weight: 500; }
+  td.num { font-family: var(--mono); font-size: 12.5px; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .ad-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; background: var(--panel-2);
+  }
+  .ad-item.off { opacity: .55; }
+  .ad-item .meta { flex: 1; min-width: 0; }
+  .ad-item .meta b { font-size: 13.5px; display: block; }
+  .ad-item .meta span { font-size: 12px; color: var(--muted); }
+  .badge {
+    font-size: 11px; padding: 1px 7px; border-radius: 999px;
+    background: var(--panel-3); color: var(--muted); border: 1px solid var(--border);
+  }
+  .badge.on { background: rgba(15,157,88,.1); color: var(--ok); border-color: rgba(15,157,88,.28); }
+  .badge.html { background: rgba(199,124,11,.1); color: var(--warn); border-color: rgba(199,124,11,.28); }
+
+  .empty { text-align: center; color: var(--muted); font-size: 13px; padding: 26px 0; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field-row { display: flex; gap: 10px; align-items: center; }
+  .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  /* 弹层 */
+  .mask {
+    position: fixed; inset: 0; background: rgba(10,12,20,.5);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 40px 16px; overflow: auto; z-index: 50;
+  }
+  .mask[hidden] { display: none; }
+  .modal {
+    width: 100%; max-width: 560px; background: var(--panel);
+    border-radius: 14px; border: 1px solid var(--border);
+    box-shadow: 0 30px 70px -30px rgba(0,0,0,.5); padding: 22px;
+  }
+  .modal h3 { margin: 0 0 14px; font-size: 15px; }
+  .modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  @media (max-width: 620px) {
+    .shell { padding: 14px 14px 50px; }
+    .row2 { grid-template-columns: 1fr; }
+    .stat .v { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 登录 ============ -->
+<div class="login-wrap" id="loginView">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <h1>方寸工具箱</h1>
+        <div class="sub">统计与广告后台</div>
+      </div>
+    </div>
+    <label for="u">账号</label>
+    <input id="u" name="username" type="text" value="admin" autocomplete="username" required>
+    <label for="p">密码</label>
+    <input id="p" name="password" type="password" autocomplete="current-password" required>
+    <div class="msg" id="loginMsg"></div>
+    <button class="btn primary" type="submit" style="width:100%;margin-top:8px;height:38px;justify-content:center">登录</button>
+  </form>
+</div>
+
+<!-- ============ 主体 ============ -->
+<div class="shell" id="mainView" hidden>
+  <div class="topbar">
+    <span class="mark" aria-hidden="true"></span>
+    <b>方寸工具箱</b>
+    <span class="tag">后台</span>
+    <span class="spacer"></span>
+    <a class="btn sm" href="/" target="_blank" rel="noopener">查看站点</a>
+    <button class="btn sm" id="logoutBtn" type="button">退出</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="stats" type="button">概览</button>
+    <button class="tab" data-tab="ads" type="button">广告管理</button>
+    <button class="tab" data-tab="setting" type="button">设置</button>
+  </div>
+
+  <div id="paneStats">
+    <div class="cards" id="statCards"></div>
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <h2 style="margin:0">访问趋势</h2>
+        <span class="spacer"></span>
+        <select id="rangeSel" style="width:auto;padding:5px 9px;font-size:12.5px">
+          <option value="7">近 7 天</option>
+          <option value="14">近 14 天</option>
+          <option value="30">近 30 天</option>
+          <option value="90">近 90 天</option>
+        </select>
+      </div>
+      <svg class="chart" id="chart" viewBox="0 0 720 190" preserveAspectRatio="none" role="img" aria-label="PV 与 UV 趋势"></svg>
+      <div class="legend">
+        <span><i style="background:#4f46e5"></i>PV 浏览量</span>
+        <span><i style="background:#0ea5e9"></i>UV 访客数</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>页面排行</h2>
+      <table>
+        <thead><tr><th style="width:44%">页面</th><th>PV</th><th>UV</th><th style="width:30%">占比</th></tr></thead>
+        <tbody id="pageRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="paneAds" hidden>
+    <div class="panel">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">广告位</h2>
+        <span class="spacer"></span>
+        <button class="btn primary sm" id="newAdBtn" type="button">+ 新建广告</button>
+      </div>
+      <div id="adList"></div>
+    </div>
+  </div>
+
+  <div id="paneSetting" hidden>
+    <div class="panel" style="max-width:420px">
+      <h2>修改密码</h2>
+      <label for="oldPass">原密码</label>
+      <input id="oldPass" type="password" autocomplete="current-password">
+      <label for="newPass">新密码（至少 8 位）</label>
+      <input id="newPass" type="password" autocomplete="new-password">
+      <label for="newPass2">再输一次</label>
+      <input id="newPass2" type="password" autocomplete="new-password">
+      <div class="msg" id="passMsg"></div>
+      <button class="btn primary sm" id="passBtn" type="button" style="margin-top:10px">保存新密码</button>
+    </div>
+    <div class="panel" style="max-width:560px">
+      <h2>说明</h2>
+      <div class="hint" style="line-height:1.9">
+        · 统计为前端埋点，只记录页面 id、访客随机标识与时间；IP 仅参与哈希，不落原文。<br>
+        · UV 按「访客标识 + 自然日 + 页面」去重，同一浏览器同一天重复访问只算 1 个。<br>
+        · 数据保留 180 天，落在服务端的数据目录（JSON 文件），备份该目录即可。<br>
+        · 广告位共 3 处：首页顶部、首页底部、工具页底部。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 广告编辑弹层 ============ -->
+<div class="mask" id="adMask" hidden>
+  <form class="modal" id="adForm">
+    <h3 id="adFormTitle">新建广告</h3>
+    <input type="hidden" id="adId">
+
+    <div class="row2">
+      <div>
+        <label for="adSlot">投放位置</label>
+        <select id="adSlot">
+          <option value="home-top">首页 · 顶部（工具网格上方）</option>
+          <option value="home-bottom">首页 · 底部（页脚上方）</option>
+          <option value="tool-bottom">工具页 · 底部</option>
+        </select>
+      </div>
+      <div>
+        <label for="adType">类型</label>
+        <select id="adType">
+          <option value="image">图文（标题 + 图片 + 链接）</option>
+          <option value="html">代码片段（联盟广告 JS/HTML）</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="imageFields">
+      <label for="adTitle">标题</label>
+      <input id="adTitle" type="text" maxlength="120" placeholder="例：云服务器 2 核 4G 首年 99 元">
+      <label for="adDesc">描述（可选）</label>
+      <input id="adDesc" type="text" maxlength="160" placeholder="一句话补充说明">
+      <div class="row2">
+        <div>
+          <label for="adImg">图片地址</label>
+          <input id="adImg" type="url" placeholder="https://…/banner.png">
+        </div>
+        <div>
+          <label for="adLink">跳转链接</label>
+          <input id="adLink" type="url" placeholder="https://…">
+        </div>
+      </div>
+    </div>
+
+    <div id="htmlFields" hidden>
+      <label for="adHtml">广告代码</label>
+      <textarea id="adHtml" rows="7" placeholder="粘贴第三方广告代码，会原样插入页面"></textarea>
+      <div class="hint">代码会以 innerHTML 直接插入，请只粘贴可信来源。</div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label for="adStart">开始时间（可选）</label>
+        <input id="adStart" type="datetime-local">
+      </div>
+      <div>
+        <label for="adEnd">结束时间（可选）</label>
+        <input id="adEnd" type="datetime-local">
+      </div>
+    </div>
+
+    <div class="field-row" style="margin-top:14px">
+      <input type="checkbox" id="adEnabled" checked style="width:auto">
+      <label for="adEnabled" style="margin:0;color:var(--text)">启用</label>
+    </div>
+
+    <div class="msg err" id="adMsg"></div>
+    <div class="modal-foot">
+      <button class="btn" type="button" id="adCancel">取消</button>
+      <button class="btn primary" type="submit">保存</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TOKEN_KEY = 'fc_admin_token';
+  var token = '';
+  try { token = localStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
+
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = opts.headers || {};
+    if (token) headers.Authorization = 'Bearer ' + token;
+    if (opts.body) headers['Content-Type'] = 'application/json';
+    return fetch('/api' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      cache: 'no-store'
+    }).then(function (r) {
+      if (r.status === 401) { logout(); throw new Error('登录已失效'); }
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+        return j;
+      });
+    });
+  }
+
+  /* ---------------- 登录 ---------------- */
+  function showLogin() {
+    $('loginView').hidden = false;
+    $('mainView').hidden = true;
+  }
+  function showMain() {
+    $('loginView').hidden = true;
+    $('mainView').hidden = false;
+    loadStats();
+  }
+  function logout() {
+    token = '';
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    showLogin();
+  }
+
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var box = $('loginMsg');
+    box.className = 'msg';
+    box.textContent = '登录中…';
+    fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: $('u').value.trim(), pass: $('p').value })
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; });
+    }).then(function (res) {
+      if (!res.ok) {
+        box.className = 'msg err';
+        box.textContent = res.status === 429 ? '尝试次数过多，请 15 分钟后再试' : '账号或密码不正确';
+        return;
+      }
+      token = res.j.token;
+      try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+      $('p').value = '';
+      box.textContent = '';
+      showMain();
+    }).catch(function () {
+      box.className = 'msg err';
+      box.textContent = '网络异常，请检查服务是否正常';
+    });
+  });
+
+  $('logoutBtn').addEventListener('click', logout);
+
+  /* ---------------- Tab ---------------- */
+  var panes = { stats: 'paneStats', ads: 'paneAds', setting: 'paneSetting' };
+  document.querySelectorAll('.tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      Object.keys(panes).forEach(function (k) { $(panes[k]).hidden = (k !== btn.dataset.tab); });
+      if (btn.dataset.tab === 'stats') loadStats();
+      if (btn.dataset.tab === 'ads') loadAds();
+    });
+  });
+
+  /* ---------------- 统计 ---------------- */
+  var lastStats = null;
+
+  function loadStats() {
+    var days = Number($('rangeSel').value) || 7;
+    api('/admin/stats?days=' + days).then(function (d) {
+      lastStats = d;
+      renderCards(d);
+      renderChart(d.series);
+      renderPages(d.pages, d.range.pv);
+    }).catch(function (e) {
+      if (e.message !== '登录已失效') console.warn(e);
+    });
+  }
+
+  function renderCards(d) {
+    var html = [
+      card('今日 PV', d.today.pv, '浏览量'),
+      card('今日 UV', d.today.uv, '独立访客'),
+      card('近 ' + d.range.days + ' 天 PV', d.range.pv, ''),
+      card('近 ' + d.range.days + ' 天 UV', d.range.uv, ''),
+      card('累计 PV', d.total.pv, ''),
+      card('累计 UV', d.total.uv, '')
+    ].join('');
+    $('statCards').innerHTML = html;
+  }
+
+  function card(k, v, unit) {
+    return '<div class="stat"><div class="k">' + esc(k) + '</div><div class="v">' +
+      Number(v).toLocaleString('zh-CN') + (unit ? '<small>' + esc(unit) + '</small>' : '') + '</div></div>';
+  }
+
+  function renderChart(series) {
+    var svg = $('chart');
+    var W = 720, H = 190, L = 34, R = 10, T = 12, B = 24;
+    var iw = W - L - R, ih = H - T - B;
+    var n = series.length;
+    if (!n) { svg.innerHTML = ''; return; }
+
+    var maxV = 1;
+    series.forEach(function (s) { maxV = Math.max(maxV, s.pv, s.uv); });
+    maxV = Math.ceil(maxV * 1.15);
+
+    function px(i) { return n === 1 ? L + iw / 2 : L + (iw * i) / (n - 1); }
+    function py(v) { return T + ih - (ih * v) / maxV; }
+
+    var grid = '';
+    for (var g = 0; g <= 4; g++) {
+      var y = T + (ih * g) / 4;
+      var val = Math.round(maxV - (maxV * g) / 4);
+      grid += '<line x1="' + L + '" y1="' + y + '" x2="' + (W - R) + '" y2="' + y +
+        '" stroke="currentColor" stroke-opacity=".12" stroke-width="1"/>';
+      grid += '<text x="' + (L - 7) + '" y="' + (y + 3.5) + '" font-size="9.5" fill="currentColor" fill-opacity=".45" text-anchor="end">' + val + '</text>';
+    }
+
+    function line(key) {
+      return series.map(function (s, i) { return (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(s[key]).toFixed(1); }).join(' ');
+    }
+    function area(key) {
+      return line(key) + ' L' + px(n - 1).toFixed(1) + ' ' + (T + ih) + ' L' + px(0).toFixed(1) + ' ' + (T + ih) + ' Z';
+    }
+
+    var labelStep = Math.max(1, Math.ceil(n / 8));
+    var labels = series.map(function (s, i) {
+      if (i % labelStep !== 0 && i !== n - 1) return '';
+      var anchor = i === n - 1 ? 'end' : (i === 0 ? 'start' : 'middle');
+      var x = i === n - 1 ? (W - R) : (i === 0 ? L : px(i));
+      return '<text x="' + x.toFixed(1) + '" y="' + (H - 7) + '" font-size="9.5" fill="currentColor" fill-opacity=".45" text-anchor="' + anchor + '">' +
+        s.date.slice(5) + '</text>';
+    }).join('');
+
+    var dots = series.map(function (s, i) {
+      if (n > 20 && i !== n - 1) return '';
+      return '<circle cx="' + px(i).toFixed(1) + '" cy="' + py(s.pv).toFixed(1) + '" r="2.6" fill="#4f46e5"/>';
+    }).join('');
+
+    svg.innerHTML =
+      '<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#4f46e5" stop-opacity=".22"/>' +
+      '<stop offset="1" stop-color="#4f46e5" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      grid +
+      '<path d="' + area('pv') + '" fill="url(#ga)"/>' +
+      '<path d="' + line('uv') + '" fill="none" stroke="#0ea5e9" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<path d="' + line('pv') + '" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      dots + labels;
+  }
+
+  function renderPages(pages, rangePv) {
+    if (!pages || !pages.length) {
+      $('pageRows').innerHTML = '<tr><td colspan="4" class="empty">还没有数据，等第一个访客来吧</td></tr>';
+      return;
+    }
+    $('pageRows').innerHTML = pages.map(function (p) {
+      var pct = rangePv ? Math.round((p.pv / rangePv) * 100) : 0;
+      return '<tr><td>' + esc(p.name) + '<span style="color:var(--muted);font-size:11.5px"> · #' + esc(p.page) + '</span></td>' +
+        '<td class="num">' + p.pv + '</td><td class="num">' + p.uv + '</td>' +
+        '<td><div style="height:6px;border-radius:3px;background:var(--panel-3);overflow:hidden">' +
+        '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#6f6cf0,#4f46e5)"></div></div></td></tr>';
+    }).join('');
+  }
+
+  $('rangeSel').addEventListener('change', loadStats);
+
+  /* ---------------- 广告 ---------------- */
+  var SLOT_NAMES = {
+    'home-top': '首页顶部',
+    'home-bottom': '首页底部',
+    'tool-bottom': '工具页底部'
+  };
+
+  function loadAds() {
+    api('/admin/ads').then(function (d) { renderAds(d.ads); }).catch(function () {});
+  }
+
+  function renderAds(list) {
+    if (!list.length) {
+      $('adList').innerHTML = '<div class="empty">还没有广告。点右上角「新建广告」开始投放。</div>';
+      return;
+    }
+    $('adList').innerHTML = list.map(function (a) {
+      var off = !a.enabled;
+      var period = (a.startAt || a.endAt)
+        ? (a.startAt || '不限') + ' → ' + (a.endAt || '不限')
+        : '长期有效';
+      return '<div class="ad-item' + (off ? ' off' : '') + '">' +
+        '<span class="badge' + (a.enabled ? ' on' : '') + '">' + (a.enabled ? '投放中' : '已停用') + '</span>' +
+        '<span class="badge">' + esc(SLOT_NAMES[a.slot] || a.slot) + '</span>' +
+        '<span class="badge' + (a.type === 'html' ? ' html' : '') + '">' + (a.type === 'html' ? '代码' : '图文') + '</span>' +
+        '<div class="meta"><b>' + esc(a.title || (a.type === 'html' ? '(代码片段)' : '(无标题)')) + '</b>' +
+        '<span>' + esc(a.type === 'image' ? (a.desc || a.linkUrl || '') : 'HTML 片段') + ' · ' + esc(period) + '</span></div>' +
+        '<button class="btn sm" data-act="toggle" data-id="' + a.id + '">' + (a.enabled ? '停用' : '启用') + '</button>' +
+        '<button class="btn sm" data-act="edit" data-id="' + a.id + '">编辑</button>' +
+        '<button class="btn sm danger" data-act="del" data-id="' + a.id + '">删除</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  $('adList').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    var id = btn.dataset.id;
+    var act = btn.dataset.act;
+    api('/admin/ads').then(function (d) {
+      var ad = d.ads.find(function (a) { return a.id === id; });
+      if (!ad) return;
+      if (act === 'toggle') {
+        var body = Object.assign({}, ad, { enabled: !ad.enabled });
+        return api('/admin/ads/' + id, { method: 'PUT', body: body }).then(loadAds);
+      }
+      if (act === 'edit') { openAdModal(ad); return; }
+      if (act === 'del') {
+        if (!confirm('确定删除这条广告？')) return;
+        return api('/admin/ads/' + id, { method: 'DELETE' }).then(loadAds);
+      }
+    }).catch(function () {});
+  });
+
+  /* 弹层 */
+  function openAdModal(ad) {
+    $('adFormTitle').textContent = ad ? '编辑广告' : '新建广告';
+    $('adId').value = ad ? ad.id : '';
+    $('adSlot').value = ad ? ad.slot : 'home-top';
+    $('adType').value = ad ? ad.type : 'image';
+    $('adTitle').value = ad ? (ad.title || '') : '';
+    $('adDesc').value = ad ? (ad.desc || '') : '';
+    $('adImg').value = ad ? (ad.imageUrl || '') : '';
+    $('adLink').value = ad ? (ad.linkUrl || '') : '';
+    $('adHtml').value = ad ? (ad.html || '') : '';
+    $('adStart').value = ad && ad.startAt ? String(ad.startAt).slice(0, 16) : '';
+    $('adEnd').value = ad && ad.endAt ? String(ad.endAt).slice(0, 16) : '';
+    $('adEnabled').checked = ad ? !!ad.enabled : true;
+    $('adMsg').textContent = '';
+    toggleType();
+    $('adMask').hidden = false;
+    setTimeout(function () { $('adTitle').focus(); }, 30);
+  }
+  function closeAdModal() { $('adMask').hidden = true; }
+
+  function toggleType() {
+    var isHtml = $('adType').value === 'html';
+    $('imageFields').hidden = isHtml;
+    $('htmlFields').hidden = !isHtml;
+  }
+  $('adType').addEventListener('change', toggleType);
+  $('newAdBtn').addEventListener('click', function () { openAdModal(null); });
+  $('adCancel').addEventListener('click', closeAdModal);
+  $('adMask').addEventListener('click', function (e) { if (e.target === $('adMask')) closeAdModal(); });
+
+  $('adForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var id = $('adId').value;
+    var type = $('adType').value;
+    var body = {
+      slot: $('adSlot').value,
+      type: type,
+      title: $('adTitle').value.trim(),
+      desc: $('adDesc').value.trim(),
+      imageUrl: $('adImg').value.trim(),
+      linkUrl: $('adLink').value.trim(),
+      html: $('adHtml').value,
+      startAt: $('adStart').value,
+      endAt: $('adEnd').value,
+      enabled: $('adEnabled').checked
+    };
+    if (type === 'image' && !body.title) { $('adMsg').textContent = '图文广告需要填标题'; return; }
+    if (type === 'image' && !body.linkUrl) { $('adMsg').textContent = '图文广告需要填跳转链接'; return; }
+    if (type === 'html' && !body.html.trim()) { $('adMsg').textContent = '请粘贴广告代码'; return; }
+
+    $('adMsg').textContent = '保存中…';
+    var req = id
+      ? api('/admin/ads/' + id, { method: 'PUT', body: body })
+      : api('/admin/ads', { method: 'POST', body: body });
+    req.then(function () {
+      closeAdModal();
+      loadAds();
+    }).catch(function (err) {
+      $('adMsg').textContent = err.message || '保存失败';
+    });
+  });
+
+  /* ---------------- 改密码 ---------------- */
+  $('passBtn').addEventListener('click', function () {
+    var box = $('passMsg');
+    box.className = 'msg';
+    if ($('newPass').value !== $('newPass2').value) {
+      box.className = 'msg err';
+      box.textContent = '两次输入的新密码不一致';
+      return;
+    }
+    if ($('newPass').value.length < 8) {
+      box.className = 'msg err';
+      box.textContent = '新密码至少 8 位';
+      return;
+    }
+    box.textContent = '保存中…';
+    api('/admin/password', {
+      method: 'POST',
+      body: { old: $('oldPass').value, next: $('newPass').value }
+    }).then(function () {
+      box.className = 'msg ok';
+      box.textContent = '已修改，下次请用新密码登录';
+      $('oldPass').value = $('newPass').value = $('newPass2').value = '';
+    }).catch(function (e) {
+      box.className = 'msg err';
+      box.textContent = e.message === 'old password wrong' ? '原密码不正确' : (e.message || '修改失败');
+    });
+  });
+
+  /* ---------------- 启动 ---------------- */
+  if (token) {
+    api('/admin/stats?days=1').then(function () { showMain(); }).catch(function () { showLogin(); });
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  方寸工具箱 站点地图
+
+  说明：当前站点使用 hash 路由（/#json），# 之后的内容不会发送给服务器，
+  搜索引擎无法将其视为独立页面，因此这里只提交首页。
+
+  如果后续改为 History API 路由（/json、/cron …），请把 16 个工具的
+  独立 URL 一并加进来，并配合 sitemap 的分片策略。
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://tools.v5pc.com/</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://tools.v5pc.com/"/>
+  </url>
+
+</urlset>
